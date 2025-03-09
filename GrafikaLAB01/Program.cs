@@ -15,8 +15,8 @@ namespace GrafikaLAB01
 
         private static readonly string VertexShaderSource = @"
         #version 330 core
-        layout (location = 0) in vec3 vPos;
-		layout (location = 1) in vec4 vCol;
+        layout (location = 1) in vec3 vPos; //beallitottam 1-re es kaptam egy igen erdekes dolgot
+		layout (location = 0) in vec4 vCol; // itt ugyanazt a formatumot kaptam, viszont majdnem minden fekete nemi piros arnyalattal
 
 		out vec4 outCol;
         
@@ -68,7 +68,7 @@ namespace GrafikaLAB01
             uint fshader = Gl.CreateShader(ShaderType.FragmentShader);
 
             Gl.ShaderSource(vshader, VertexShaderSource);
-           // Gl.CompileShader(vshader);
+            Gl.CompileShader(vshader);
             Gl.GetShader(vshader, ShaderParameterName.CompileStatus, out int vStatus);
             if (vStatus != (int)GLEnum.True)
                 throw new Exception("Vertex shader failed to compile: " + Gl.GetShaderInfoLog(vshader));
@@ -79,7 +79,6 @@ namespace GrafikaLAB01
             program = Gl.CreateProgram();
             Gl.AttachShader(program, vshader);
             Gl.AttachShader(program, fshader);
-            Gl.CompileShader(vshader);
             Gl.LinkProgram(program);
             Gl.DetachShader(program, vshader);
             Gl.DetachShader(program, fshader);
