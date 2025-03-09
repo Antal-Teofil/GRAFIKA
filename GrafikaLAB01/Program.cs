@@ -37,7 +37,7 @@ namespace GrafikaLAB01
 
         void main()
         {
-            float pulse = 0.5 +  0.5 * sin(time);
+            float pulse = 0.5 +  0.5 * sin(time * 3.0);
             FragColor = outCol * pulse;
         }
         ";
