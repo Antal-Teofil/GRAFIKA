@@ -22,8 +22,8 @@ namespace GrafikaLAB01
         
         void main()
         {
-			outCol = vCol;
-            gl_Position = vec4(vPos.y, vPos.x, vPos.z, 1.0);
+			gl_Position = vec4(vPos, 1.0);
+            outCol = vCol;
         }
         ";
 
@@ -31,12 +31,14 @@ namespace GrafikaLAB01
         private static readonly string FragmentShaderSource = @"
         #version 330 core
         out vec4 FragColor;
-		
-		in vec4 outCol;
+        in vec4 outCol;
+
+        uniform float time;
 
         void main()
         {
-            FragColor = outCol;
+            float pulse = 0.5 +  0.5 * sin(time);
+            FragColor = outCol * pulse;
         }
         ";
 
@@ -156,6 +158,8 @@ namespace GrafikaLAB01
             Gl.BufferData(GLEnum.ElementArrayBuffer, (ReadOnlySpan<uint>)indexArray.AsSpan(), GLEnum.StaticDraw);
             Gl.BindBuffer(GLEnum.ArrayBuffer, 0);
             Gl.UseProgram(program);
+            float elapsedTime = (float)graphicWindow.Time;
+            Gl.Uniform1(Gl.GetUniformLocation(program,  "time"), elapsedTime);
 
             Gl.DrawElements(GLEnum.Triangles, (uint)indexArray.Length, GLEnum.UnsignedInt, null); // we used element buffer
             Gl.BindBuffer(GLEnum.ElementArrayBuffer, 0);
