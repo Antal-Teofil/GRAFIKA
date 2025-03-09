@@ -15,15 +15,15 @@ namespace GrafikaLAB01
 
         private static readonly string VertexShaderSource = @"
         #version 330 core
-        layout (location = 1) in vec3 vPos; //beallitottam 1-re es kaptam egy igen erdekes dolgot
-		layout (location = 0) in vec4 vCol; // itt ugyanazt a formatumot kaptam, viszont majdnem minden fekete nemi piros arnyalattal
+        layout (location = 0) in vec3 vPos;
+		layout (location = 1) in vec4 vCol;
 
 		out vec4 outCol;
         
         void main()
         {
 			outCol = vCol;
-            gl_Position = vec4(vPos.x, vPos.y, vPos.z, 1.0);
+            gl_Position = vec4(vPos.y, vPos.x, vPos.z, 1.0);
         }
         ";
 
