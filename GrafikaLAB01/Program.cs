@@ -1,10 +1,8 @@
 ﻿using Silk.NET.OpenGL;
 using Silk.NET.Windowing;
-using System;
 
 namespace GrafikaLAB01
 {
-    // push proba
     internal static class Program
     {
         private static IWindow graphicWindow;
@@ -19,13 +17,11 @@ namespace GrafikaLAB01
 		layout (location = 1) in vec4 vCol;
 
 		out vec4 outCol;
-        out vec2 fragPos;
         
         void main()
         {
-			gl_Position = vec4(vPos, 1.0);
-            outCol = vCol;
-            fragPos = vPos.xy;
+			outCol = vCol;
+            gl_Position = vec4(vPos.x, vPos.y, vPos.z, 1.0);
         }
         ";
 
@@ -33,20 +29,12 @@ namespace GrafikaLAB01
         private static readonly string FragmentShaderSource = @"
         #version 330 core
         out vec4 FragColor;
-        in vec4 outCol;
-        in vec2 fragPos;
-
-        uniform float time;
+		
+		in vec4 outCol;
 
         void main()
         {
-            float angle = time; // forgatas az ido fuggvenyeben
-            mat2 rotation = mat2(cos(angle), -sin(angle), sin(angle), cos(angle));
-            vec2 rotatedPos = rotation * fragPos; 
-            float colorFactor = (rotatedPos.x + rotatedPos.y) * 0.5 + 0.5;
-            
-            vec3 rotatedColor = mix(vec3(1.0, 0.0, 0.0), vec3(0.0, 0.0, 1.0), colorFactor);
-            FragColor = vec4(rotatedColor, 1.0);
+            FragColor = outCol;
         }
         ";
 
@@ -119,34 +107,23 @@ namespace GrafikaLAB01
             uint vao = Gl.GenVertexArray();
             Gl.BindVertexArray(vao);
 
-            float radius = 0.5f;
             float[] vertexArray = new float[] {
-               0.0f, 0.0f, 0.0f, //kozeppont
-               radius * MathF.Cos(0.0f), radius * MathF.Sin(0.0f), 0.0f,
-               radius * MathF.Cos(MathF.PI / 3), radius * MathF.Sin(MathF.PI / 3), 0.0f,
-               radius * MathF.Cos(2 * MathF.PI / 3), radius * MathF.Sin(2 * MathF.PI / 3), 0.0f,
-               radius * MathF.Cos(MathF.PI), radius * MathF.Sin(MathF.PI), 0.0f,
-               radius * MathF.Cos(4* MathF.PI / 3), radius * MathF.Sin(4 * MathF.PI / 3), 0.0f,
-               radius * MathF.Cos(5 * MathF.PI / 3), radius * MathF.Sin(5 * MathF.PI / 3), 0.0f,
+                -0.5f, -0.5f, 0.0f,
+                +0.5f, -0.5f, 0.0f,
+                 0.0f, +0.5f, 0.0f,
+                 1f, 1f, 0f
             };
 
             float[] colorArray = new float[] {
-                1.0f, 1.0f, 1.0f, 1.0f,//kozeppont - feher
-                1.0f, 0.0f, 0.0f, 1.0f, // piros
-                1.0f, 0.5f, 0.0f, 1.0f, // narancs
-                1.0f, 1.0f, 0.0f, 1.0f, // sarga
-                0.0f, 1.0f, 0.0f, 1.0f,// zold
-                0.0f, 0.0f, 1.0f, 1.0f,//li
-                0.0f, 1.0f, 1.0f, 1.0f //cigan
+                1.0f, 0.0f, 0.0f, 1.0f,
+                0.0f, 1.0f, 0.0f, 1.0f,
+                0.0f, 0.0f, 1.0f, 1.0f,
+                1.0f, 0.0f, 0.0f, 1.0f,
             };
 
             uint[] indexArray = new uint[] {
                 0, 1, 2,
-                0,2,3,
-                0,3,4,
-                0, 4, 5,
-                0, 5, 6,
-                0, 6, 1
+                2, 1, 3
             };
 
             uint vertices = Gl.GenBuffer();
@@ -164,10 +141,10 @@ namespace GrafikaLAB01
             uint indices = Gl.GenBuffer();
             Gl.BindBuffer(GLEnum.ElementArrayBuffer, indices);
             Gl.BufferData(GLEnum.ElementArrayBuffer, (ReadOnlySpan<uint>)indexArray.AsSpan(), GLEnum.StaticDraw);
+
             Gl.BindBuffer(GLEnum.ArrayBuffer, 0);
+
             Gl.UseProgram(program);
-            float elapsedTime = (float)graphicWindow.Time;
-            Gl.Uniform1(Gl.GetUniformLocation(program,  "time"), elapsedTime);
 
             Gl.DrawElements(GLEnum.Triangles, (uint)indexArray.Length, GLEnum.UnsignedInt, null); // we used element buffer
             Gl.BindBuffer(GLEnum.ElementArrayBuffer, 0);
