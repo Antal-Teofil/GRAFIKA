@@ -19,11 +19,13 @@ namespace GrafikaLAB01
 		layout (location = 1) in vec4 vCol;
 
 		out vec4 outCol;
+        out vec2 fragPos;
         
         void main()
         {
 			gl_Position = vec4(vPos, 1.0);
             outCol = vCol;
+            fragPos = vPos.xy;
         }
         ";
 
@@ -32,13 +34,19 @@ namespace GrafikaLAB01
         #version 330 core
         out vec4 FragColor;
         in vec4 outCol;
+        in vec2 fragPos;
 
         uniform float time;
 
         void main()
         {
-            float pulse = 0.5 +  0.5 * sin(time * 10);
-            FragColor = vec4(outCol.r * pulse, outCol.g, outCol.b, 1.0);
+            float angle = time; // forgatas az ido fuggvenyeben
+            mat2 rotation = mat2(cos(angle), -sin(angle), sin(angle), cos(angle));
+            vec2 rotatedPos = rotation * fragPos; 
+            float colorFactor = (rotatedPos.x + rotatedPos.y) * 0.5 + 0.5;
+            
+            vec3 rotatedColor = mix(vec3(1.0, 0.0, 0.0), vec3(0.0, 0.0, 1.0), colorFactor);
+            FragColor = vec4(rotatedColor, 1.0);
         }
         ";
 
