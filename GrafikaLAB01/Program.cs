@@ -4,6 +4,7 @@ using System;
 
 namespace GrafikaLAB01
 {
+    // push proba
     internal static class Program
     {
         private static IWindow graphicWindow;
