@@ -109,29 +109,34 @@ namespace GrafikaLAB01
             uint vao = Gl.GenVertexArray();
             Gl.BindVertexArray(vao);
 
+            float radius = 0.5f;
             float[] vertexArray = new float[] {
-                0.5f, 0.5f, 0.0f,
-                0.43f, 0.25f, 0.0f,
-                 0.43f, -0.25f, 0.0f,
-                 0.0f, -0.5f, 0.0f,
-                 -0.43f, -0.25f, 0.0f,
-                 -0.43f, 0.25f, 0.0f
+               0.0f, 0.0f, 0.0f, //kozeppont
+               radius * MathF.Cos(0.0f), radius * MathF.Sin(0.0f), 0.0f,
+               radius * MathF.Cos(MathF.PI / 3), radius * MathF.Sin(MathF.PI / 3), 0.0f,
+               radius * MathF.Cos(2 * MathF.PI / 3), radius * MathF.Sin(2 * MathF.PI / 3), 0.0f,
+               radius * MathF.Cos(MathF.PI), radius * MathF.Sin(MathF.PI), 0.0f,
+               radius * MathF.Cos(4* MathF.PI / 3), radius * MathF.Sin(4 * MathF.PI / 3), 0.0f,
+               radius * MathF.Cos(5 * MathF.PI / 3), radius * MathF.Sin(5 * MathF.PI / 3), 0.0f,
             };
 
             float[] colorArray = new float[] {
-                1.0f, 0.0f, 0.0f, 1.0f,
-                0.0f, 1.0f, 0.0f, 1.0f,
-                0.0f, 0.0f, 1.0f, 1.0f,
-                1.0f, 1.0f, 0.0f, 1.0f,
-                1.0f, 0.0f, 1.0f, 1.0f,
-                0.0f, 1.0f, 1.0f, 1.0f
+                1.0f, 1.0f, 1.0f, 1.0f,//kozeppont - feher
+                1.0f, 0.0f, 0.0f, 1.0f, // piros
+                0.0f, 1.0f, 0.0f, 1.0f, //zold
+                0.0f, 0.0f, 1.0f, 1.0f, // kek
+                1.0f, 1.0f, 0.0f, 1.0f,// sarga
+                1.0f, 0.0f, 1.0f, 1.0f,//lila
+                0.0f, 1.0f, 1.0f, 1.0f //cigan
             };
 
             uint[] indexArray = new uint[] {
                 0, 1, 2,
                 0,2,3,
                 0,3,4,
-                0, 4, 5
+                0, 4, 5,
+                0, 5, 6,
+                0, 6, 1
             };
 
             uint vertices = Gl.GenBuffer();
