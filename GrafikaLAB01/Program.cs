@@ -67,7 +67,7 @@ namespace GrafikaLAB01
             uint vshader = Gl.CreateShader(ShaderType.VertexShader);
             uint fshader = Gl.CreateShader(ShaderType.FragmentShader);
 
-            Gl.ShaderSource(vshader, VertexShaderSource);
+            //Gl.ShaderSource(vshader, VertexShaderSource);
             Gl.CompileShader(vshader);
             Gl.GetShader(vshader, ShaderParameterName.CompileStatus, out int vStatus);
             if (vStatus != (int)GLEnum.True)
@@ -126,8 +126,8 @@ namespace GrafikaLAB01
                 1.0f, 0.5f, 0.0f, 1.0f, // narancs
                 1.0f, 1.0f, 0.0f, 1.0f, // sarga
                 0.0f, 1.0f, 0.0f, 1.0f,// zold
-                0.0f, 0.0f, 1.0f, 1.0f,//kek
-                1.0f, 0.0f, 1.0f, 1.0f //cigan
+                0.0f, 0.0f, 1.0f, 1.0f,//li
+                0.0f, 1.0f, 1.0f, 1.0f //cigan
             };
 
             uint[] indexArray = new uint[] {
@@ -143,18 +143,18 @@ namespace GrafikaLAB01
             Gl.BindBuffer(GLEnum.ArrayBuffer, vertices);
             Gl.BufferData(GLEnum.ArrayBuffer, (ReadOnlySpan<float>)vertexArray.AsSpan(), GLEnum.StaticDraw);
             Gl.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 0, null);
-            Gl.EnableVertexAttribArray(1);
+            Gl.EnableVertexAttribArray(0);
 
             uint colors = Gl.GenBuffer();
             Gl.BindBuffer(GLEnum.ArrayBuffer, colors);
             Gl.BufferData(GLEnum.ArrayBuffer, (ReadOnlySpan<float>)colorArray.AsSpan(), GLEnum.StaticDraw);
             Gl.VertexAttribPointer(1, 4, VertexAttribPointerType.Float, false, 0, null);
-            Gl.EnableVertexAttribArray(0);
+            Gl.EnableVertexAttribArray(1);
 
             uint indices = Gl.GenBuffer();
             Gl.BindBuffer(GLEnum.ElementArrayBuffer, indices);
             Gl.BufferData(GLEnum.ElementArrayBuffer, (ReadOnlySpan<uint>)indexArray.AsSpan(), GLEnum.StaticDraw);
-            Gl.BindBuffer(GLEnum.ArrayBuffer, 1);
+            Gl.BindBuffer(GLEnum.ArrayBuffer, 0);
             Gl.UseProgram(program);
 
             Gl.DrawElements(GLEnum.Triangles, (uint)indexArray.Length, GLEnum.UnsignedInt, null); // we used element buffer
