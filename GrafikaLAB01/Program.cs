@@ -123,11 +123,11 @@ namespace GrafikaLAB01
             float[] colorArray = new float[] {
                 1.0f, 1.0f, 1.0f, 1.0f,//kozeppont - feher
                 1.0f, 0.0f, 0.0f, 1.0f, // piros
-                0.0f, 1.0f, 0.0f, 1.0f, //zold
-                0.0f, 0.0f, 1.0f, 1.0f, // kek
-                1.0f, 1.0f, 0.0f, 1.0f,// sarga
-                1.0f, 0.0f, 1.0f, 1.0f,//lila
-                0.0f, 1.0f, 1.0f, 1.0f //cigan
+                1.0f, 0.5f, 0.0f, 1.0f, // narancs
+                1.0f, 1.0f, 0.0f, 1.0f, // sarga
+                0.0f, 1.0f, 0.0f, 1.0f,// zold
+                0.0f, 0.0f, 1.0f, 1.0f,//kek
+                1.0f, 0.0f, 1.0f, 1.0f //cigan
             };
 
             uint[] indexArray = new uint[] {
