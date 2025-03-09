@@ -110,10 +110,12 @@ namespace GrafikaLAB01
             Gl.BindVertexArray(vao);
 
             float[] vertexArray = new float[] {
-                -0.5f, -0.5f, 0.0f,
-                0.5f, -0.5f, 0.0f,
-                 0.5f, 0.5f, 0.0f,
-                 -0.5f, 0.5f, 0.0f
+                0.5f, 0.5f, 0.0f,
+                0.43f, 0.25f, 0.0f,
+                 0.43f, -0.25f, 0.0f,
+                 0.0f, -0.5f, 0.0f,
+                 -0.43f, -0.25f, 0.0f,
+                 -0.43f, 0.25f, 0.0f
             };
 
             float[] colorArray = new float[] {
@@ -121,11 +123,15 @@ namespace GrafikaLAB01
                 0.0f, 1.0f, 0.0f, 1.0f,
                 0.0f, 0.0f, 1.0f, 1.0f,
                 1.0f, 1.0f, 0.0f, 1.0f,
+                1.0f, 0.0f, 1.0f, 1.0f,
+                0.0f, 1.0f, 1.0f, 1.0f
             };
 
             uint[] indexArray = new uint[] {
                 0, 1, 2,
-                2, 3, 0
+                0,2,3,
+                0,3,4,
+                0, 4, 5
             };
 
             uint vertices = Gl.GenBuffer();
