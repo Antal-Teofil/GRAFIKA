@@ -179,8 +179,12 @@ namespace GrafikaLAB02
                 case Key.Right: camera.IncreaseZYAngle(); break;
                 case Key.Down: camera.DecreaseZXAngle(); break; // modositottam hogy lassam a tetejet es az aljat is
                 case Key.Up: camera.IncreaseZXAngle(); break;
-                case Key.U: camera.IncreaseZXAngle(); break;
-                case Key.D: camera.DecreaseZXAngle(); break;
+                case Key.W: camera.IncreaseDistance(); break;
+                case Key.S: camera.DecreaseDistance(); break;
+                case Key.A: camera.moveForward(0.1f); break;
+                case Key.D: camera.moveRight(0.1f); break;
+                case Key.Q: camera.moveForward(-0.1f); break;
+                case Key.R: camera.moveRight(-0.1f); break;
             }
         }
 
