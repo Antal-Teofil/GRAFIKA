@@ -184,19 +184,24 @@ namespace GrafikaLAB02
             SetMatrix(projectionMatrix, ProjectionMatrixVariableName);
 
 
-            var modelMatrixCenterCube = Matrix4X4.CreateScale((float)cubeArrangementModel.CenterCubeScale);
-            SetMatrix(modelMatrixCenterCube, ModelMatrixVariableName);
-            DrawModelObject(cube);
+            float spacing = 0.33f;
 
-            Matrix4X4<float> diamondScale = Matrix4X4.CreateScale(0.25f);
-            Matrix4X4<float> rotx = Matrix4X4.CreateRotationX((float)Math.PI / 4f);
-            Matrix4X4<float> rotz = Matrix4X4.CreateRotationZ((float)Math.PI / 4f);
-            Matrix4X4<float> roty = Matrix4X4.CreateRotationY((float)cubeArrangementModel.DiamondCubeLocalAngle);
-            Matrix4X4<float> trans = Matrix4X4.CreateTranslation(1f, 1f, 0f);
-            Matrix4X4<float> rotGlobalY = Matrix4X4.CreateRotationY((float)cubeArrangementModel.DiamondCubeGlobalYAngle);
-            Matrix4X4<float> dimondCubeModelMatrix = diamondScale * rotx * rotz * roty * trans * rotGlobalY;
-            SetMatrix(dimondCubeModelMatrix, ModelMatrixVariableName);
-            DrawModelObject(cube);
+            for(int x = -1; x<=1; x++)
+            {
+                for(int y = -1; y<=1; y++)
+                {
+                    for(int z = -1; z<=1;z++)
+                    {
+                        Vector3D<float> pos = new Vector3D<float>(x * spacing, y * spacing, z * spacing);
+                        var translate = Matrix4X4.CreateTranslation(pos);
+                        var scale = Matrix4X4.CreateScale(0.3f);
+                        var rubikModel = scale * translate;
+                        SetMatrix(rubikModel, ModelMatrixVariableName);
+                        DrawModelObject(cube);
+
+                    }
+                }
+            }
 
         }
 
@@ -229,4 +234,3 @@ namespace GrafikaLAB02
         }
     }
 }
-//sajt
