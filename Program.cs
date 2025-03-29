@@ -3,6 +3,7 @@ using Silk.NET.Maths;
 using Silk.NET.OpenGL;
 using Silk.NET.Windowing;
 using System;
+using System.Collections.Generic;
 using Szeminarium;
 
 namespace GrafikaLAB02
@@ -10,14 +11,12 @@ namespace GrafikaLAB02
     internal class Program
     {
         private static IWindow graphicWindow;
-
         private static GL Gl;
 
-        private static ModelObjectDescriptor cube;
+        //minden kockahoz tartozik egy ModelObjectDescriptor
+        private static List<ModelObjectDescriptor> cubes;
 
         private static CameraDescriptor camera = new CameraDescriptor();
-
-        private static CubeArrangementModel cubeArrangementModel = new CubeArrangementModel();
 
         private const string ModelMatrixVariableName = "uModel";
         private const string ViewMatrixVariableName = "uView";
@@ -26,27 +25,25 @@ namespace GrafikaLAB02
         private static readonly string VertexShaderSource = @"
         #version 330 core
         layout (location = 0) in vec3 vPos;
-		layout (location = 1) in vec4 vCol;
+        layout (location = 1) in vec4 vCol;
 
         uniform mat4 uModel;
         uniform mat4 uView;
         uniform mat4 uProjection;
 
-		out vec4 outCol;
-        
+        out vec4 outCol;
+
         void main()
         {
-			outCol = vCol;
-            gl_Position = uProjection*uView*uModel*vec4(vPos.x, vPos.y, vPos.z, 1.0);
+            outCol = vCol;
+            gl_Position = uProjection * uView * uModel * vec4(vPos, 1.0);
         }
         ";
-
 
         private static readonly string FragmentShaderSource = @"
         #version 330 core
         out vec4 FragColor;
-		
-		in vec4 outCol;
+        in vec4 outCol;
 
         void main()
         {
@@ -56,11 +53,33 @@ namespace GrafikaLAB02
 
         private static uint program;
 
+        //definialom elore az alap szineket, belul fekete lesz
+        private static float[] White = { 1f, 1f, 1f, 1f };
+        private static float[] Yellow = { 1f, 1f, 0f, 1f };
+        private static float[] Red = { 1f, 0f, 0f, 1f };
+        private static float[] Orange = { 1f, 0.5f, 0f, 1f };
+        private static float[] Blue = { 0f, 0f, 1f, 1f };
+        private static float[] Green = { 0f, 1f, 0f, 1f };
+        private static float[] Black = { 0f, 0f, 0f, 1f };
+
+        //minden kis kockahoz epitunk egy szinmatrixot
+        private static float[] CreateColorArray(float[] top, float[] bottom, float[] front, float[] back, float[] left, float[] right)
+        {
+            List<float> colors = new();
+            for (int i = 0; i < 4; i++) colors.AddRange(top);
+            for (int i = 0; i < 4; i++) colors.AddRange(front);
+            for (int i = 0; i < 4; i++) colors.AddRange(left);
+            for (int i = 0; i < 4; i++) colors.AddRange(bottom);
+            for (int i = 0; i < 4; i++) colors.AddRange(back);
+            for (int i = 0; i < 4; i++) colors.AddRange(right);
+            return colors.ToArray();
+        }
+
         static void Main(string[] args)
         {
             WindowOptions windowOptions = WindowOptions.Default;
-            windowOptions.Title = "Grafika szeminárium";
-            windowOptions.Size = new Silk.NET.Maths.Vector2D<int>(500, 500);
+            windowOptions.Title = "Rubik's Cube Renderer";
+            windowOptions.Size = new Vector2D<int>(500, 500);
 
             graphicWindow = Window.Create(windowOptions);
 
@@ -74,30 +93,23 @@ namespace GrafikaLAB02
 
         private static void GraphicWindow_Closing()
         {
-            cube.Dispose();
+            foreach (var cube in cubes)
+                cube.Dispose();
             Gl.DeleteProgram(program);
         }
 
         private static void GraphicWindow_Load()
         {
             Gl = graphicWindow.CreateOpenGL();
-
             var inputContext = graphicWindow.CreateInput();
             foreach (var keyboard in inputContext.Keyboards)
-            {
                 keyboard.KeyDown += Keyboard_KeyDown;
-            }
-
-            cube = ModelObjectDescriptor.CreateCube(Gl);
 
             Gl.ClearColor(System.Drawing.Color.White);
-
             Gl.Enable(EnableCap.CullFace);
             Gl.CullFace(TriangleFace.Back);
-
             Gl.Enable(EnableCap.DepthTest);
             Gl.DepthFunc(DepthFunction.Lequal);
-
 
             uint vshader = Gl.CreateShader(ShaderType.VertexShader);
             uint fshader = Gl.CreateShader(ShaderType.FragmentShader);
@@ -123,15 +135,39 @@ namespace GrafikaLAB02
             Gl.DetachShader(program, fshader);
             Gl.DeleteShader(vshader);
             Gl.DeleteShader(fshader);
-            if ((ErrorCode)Gl.GetError() != ErrorCode.NoError)
-            {
-
-            }
 
             Gl.GetProgram(program, GLEnum.LinkStatus, out var status);
             if (status == 0)
+                Console.WriteLine("Error linking shader " + Gl.GetProgramInfoLog(program));
+
+            cubes = new();
+            for (int x = -1; x <= 1; x++)
             {
-                Console.WriteLine($"Error linking shader {Gl.GetProgramInfoLog(program)}");
+                for (int y = -1; y <= 1; y++)
+                {
+                    for (int z = -1; z <= 1; z++)
+                    {
+                        // ez donti el hogy egy kis kocka melyik oldalon van, es ennek alapjan milyen szint kapjon
+                        /*
+                         ha y == 1 akkor felso sor, tehta felso oldal
+                        ha y == -1, akkor also sor
+                        z == 1, akkor elulso reteg
+                        z == -1, hatso reteg
+                        x == -1, bal oldal (kek)
+                        x == 1, akkor jobb oldal, zold
+                         */
+                        float[] top = (y == 1) ? White : Black;
+                        float[] bottom = (y == -1) ? Yellow : Black;
+                        float[] front = (z == 1) ? Red : Black;
+                        float[] back = (z == -1) ? Orange : Black;
+                        float[] left = (x == -1) ? Blue : Black;
+                        float[] right = (x == 1) ? Green : Black;
+
+                        float[] colors = CreateColorArray(top, bottom, front, back, left, right);
+                        cubes.Add(ModelObjectDescriptor.CreateCube(Gl, colors));
+                        //itt adjuk hozza a szineket az oldalakhoz
+                    }
+                }
             }
         }
 
@@ -139,36 +175,16 @@ namespace GrafikaLAB02
         {
             switch (key)
             {
-                case Key.Left:
-                    camera.DecreaseZYAngle();
-                    break;
-                case Key.Right:
-                    camera.IncreaseZYAngle();
-                    break;
-                case Key.Down:
-                    camera.IncreaseDistance();
-                    break;
-                case Key.Up:
-                    camera.DecreaseDistance();
-                    break;
-                case Key.U:
-                    camera.IncreaseZXAngle();
-                    break;
-                case Key.D:
-                    camera.DecreaseZXAngle();
-                    break;
-                case Key.Space:
-                    cubeArrangementModel.AnimationEnabled = !cubeArrangementModel.AnimationEnabled;
-                    break;
+                case Key.Left: camera.DecreaseZYAngle(); break;
+                case Key.Right: camera.IncreaseZYAngle(); break;
+                case Key.Down: camera.DecreaseZXAngle(); break; // modositottam hogy lassam a tetejet es az aljat is
+                case Key.Up: camera.IncreaseZXAngle(); break;
+                case Key.U: camera.IncreaseZXAngle(); break;
+                case Key.D: camera.DecreaseZXAngle(); break;
             }
         }
 
-        private static void GraphicWindow_Update(double deltaTime)
-        {
-            // NO OpenGL
-            // make it threadsafe
-            cubeArrangementModel.AdvanceTime(deltaTime);
-        }
+        private static void GraphicWindow_Update(double deltaTime) { }
 
         private static unsafe void GraphicWindow_Render(double deltaTime)
         {
@@ -180,29 +196,27 @@ namespace GrafikaLAB02
             var viewMatrix = Matrix4X4.CreateLookAt(camera.Position, camera.Target, camera.UpVector);
             SetMatrix(viewMatrix, ViewMatrixVariableName);
 
-            var projectionMatrix = Matrix4X4.CreatePerspectiveFieldOfView<float>((float)(Math.PI / 2), 1024f / 768f, 0.1f, 100f);
+            var projectionMatrix = Matrix4X4.CreatePerspectiveFieldOfView<float>((float)(Math.PI / 2), 1f, 0.1f, 100f);
             SetMatrix(projectionMatrix, ProjectionMatrixVariableName);
 
-
             float spacing = 0.33f;
-
-            for(int x = -1; x<=1; x++)
+            int i = 0;
+            // itt rajzoltatom ki  akis kockakat
+            for (int x = -1; x <= 1; x++)
             {
-                for(int y = -1; y<=1; y++)
+                for (int y = -1; y <= 1; y++)
                 {
-                    for(int z = -1; z<=1;z++)
+                    for (int z = -1; z <= 1; z++)
                     {
-                        Vector3D<float> pos = new Vector3D<float>(x * spacing, y * spacing, z * spacing);
+                        Vector3D<float> pos = new(x * spacing, y * spacing, z * spacing);
                         var translate = Matrix4X4.CreateTranslation(pos);
                         var scale = Matrix4X4.CreateScale(0.3f);
-                        var rubikModel = scale * translate;
-                        SetMatrix(rubikModel, ModelMatrixVariableName);
-                        DrawModelObject(cube);
-
+                        var model = scale * translate;
+                        SetMatrix(model, ModelMatrixVariableName);
+                        DrawModelObject(cubes[i++]);
                     }
                 }
             }
-
         }
 
         private static unsafe void DrawModelObject(ModelObjectDescriptor modelObject)
@@ -218,9 +232,7 @@ namespace GrafikaLAB02
         {
             int location = Gl.GetUniformLocation(program, uniformName);
             if (location == -1)
-            {
-                throw new Exception($"{ViewMatrixVariableName} uniform not found on shader.");
-            }
+                throw new Exception($"{uniformName} uniform not found on shader.");
 
             Gl.UniformMatrix4(location, 1, false, (float*)&mx);
             CheckError();
