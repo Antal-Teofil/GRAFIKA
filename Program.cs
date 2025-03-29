@@ -17,6 +17,17 @@ namespace GrafikaLAB02
         private static List<ModelObjectDescriptor> cubes;
 
         private static CameraDescriptor camera = new CameraDescriptor();
+        // A forgatási mátrix, amit a rendereléshez használunk. Ez határozza meg a forgatott lap transzformációját.
+        private static Matrix4X4<float> rotationMatrix = Matrix4X4<float>.Identity;
+        // Jelzi, hogy éppen forgatunk-e vagy sem (animáció folyamatban van-e)
+        private static bool rotating = false;
+        // Az aktuális forgatási szög radiánban (gyűjtjük frame-ről frame-re)
+        private static float rotationAngle = 0f;
+        // A forgatás sebessége radián/másodperc — itt π/2, tehát 90 fok 1 másodperc alatt
+        private static float rotationSpeed = (float)Math.PI / 2; // 90 fok egy másodperc alatt
+        // Megmondja, hogy előre (`Space`) vagy visszafelé (`Backspace`) forgatunk
+        private static bool rotateBack = false;
+
 
         private const string ModelMatrixVariableName = "uModel";
         private const string ViewMatrixVariableName = "uView";
@@ -30,6 +41,7 @@ namespace GrafikaLAB02
         uniform mat4 uModel;
         uniform mat4 uView;
         uniform mat4 uProjection;
+
 
         out vec4 outCol;
 
@@ -185,10 +197,46 @@ namespace GrafikaLAB02
                 case Key.D: camera.moveRight(0.1f); break;
                 case Key.Q: camera.moveForward(-0.1f); break;
                 case Key.R: camera.moveRight(-0.1f); break;
+                case Key.Space: //animacio kezelese
+                    if (!rotating)
+                    {
+                        rotating = true;
+                        rotateBack = false;
+                        rotationAngle = 0f;
+                    }
+                    break;
+                case Key.Backspace:
+                    if (!rotating)
+                    {
+                        rotating = true;
+                        rotateBack = true;
+                        rotationAngle = 0f;
+                    }
+                    break;
+
             }
         }
 
-        private static void GraphicWindow_Update(double deltaTime) { }
+        private static void GraphicWindow_Update(double deltaTime) {
+
+            if (!rotating) return;
+
+            // Mennyi szöggel kell elforgatni ebben a frame-ben (sebesség * eltelt idő)
+            float deltaAngle = (float)(rotationSpeed * deltaTime);
+            // Növeljük az eddigi összforgatási szöget
+            rotationAngle += deltaAngle;
+
+            if (rotationAngle >= Math.PI / 2f)
+            {
+                // Pontosítunk, hogy ne lépjük túl a 90 fokot
+                deltaAngle -= (rotationAngle - (float)Math.PI / 2f);
+                rotating = false;
+            }
+            // Ha visszafelé kell forogni, a szög negatív
+            float angle = rotateBack ? -deltaAngle : deltaAngle;
+            // Frissítjük a forgatási mátrixot a delta szöggel Y tengely körül
+            rotationMatrix *= Matrix4X4.CreateFromAxisAngle(Vector3D<float>.UnitY, angle); // pl. Y tengely mentén forgatás (felső lap)
+        }
 
         private static unsafe void GraphicWindow_Render(double deltaTime)
         {
@@ -216,7 +264,12 @@ namespace GrafikaLAB02
                         var translate = Matrix4X4.CreateTranslation(pos);
                         var scale = Matrix4X4.CreateScale(0.3f);
                         var model = scale * translate;
-                        SetMatrix(model, ModelMatrixVariableName);
+                        // feltételezzük hogy a felső (y == 1) lapot forgatjuk
+                        // Ha a kocka a forgó lapon van (pl. felső sor), akkor alkalmazzuk a forgatást
+                        bool isRotatingLayer = (y == 1);
+                        var finalModel = isRotatingLayer ? model * rotationMatrix : model;
+                        // Beállítjuk a model mátrixot shaderbe
+                        SetMatrix(finalModel, ModelMatrixVariableName);
                         DrawModelObject(cubes[i++]);
                     }
                 }
